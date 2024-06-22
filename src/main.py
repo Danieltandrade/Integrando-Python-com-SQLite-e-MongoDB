@@ -14,7 +14,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 def menu():
-
+    """
+    Função para criação do menu de escolha. Nesta função é utilizado o módulo "textwrap".
+    
+    Args:
+        Nenhum
+    
+    Return: 
+        str: Retorna uma lista com as opções do menu. 
+    """
     menu = """\n
     ================ MENU ================
     [1]\tCriar Cliente
@@ -27,10 +35,11 @@ def menu():
     return input(textwrap.dedent(menu))
 
 def cadastrando_cliente(engine):
-    """_summary_
+    """
+    Função para cadastro de novos clientes.
 
     Args:
-        engine (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
     print("@@@ Cadastro de Cliente! @@@\n")
 
@@ -48,11 +57,13 @@ def cadastrando_cliente(engine):
     print("@@@ Cliente criado com sucesso! @@@\n")
 
 def cadastrando_conta(engine, numero_conta):
-    """_summary_
-
+    """
+    Função para cadastro de novas contas para o cliente.
+    Cada conta deve ter um número diferente,
+    
     Args:
-        engine (_type_): _description_
-        numero_conta (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
+        numero_conta (int): Recebe um número inteiro referente a conta do cliente.
     """
     print("@@@ Cadastro de Conta! @@@\n")
 
@@ -77,10 +88,11 @@ def cadastrando_conta(engine, numero_conta):
     print("@@@ Conta criada com sucesso! @@@\n")
 
 def lista_clientes(engine):
-    """_summary_
+    """
+    Função que cria uma lista com todos os clientes cadastrados.
 
     Args:
-        engine (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
     session = Session(engine)
 
@@ -90,10 +102,11 @@ def lista_clientes(engine):
         print(clientes)
 
 def lista_contas(engine):
-    """_summary_
+    """
+    Função que cria uma lista com todas as contas cadastradas.
 
     Args:
-        engine (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
     session = Session(engine)
 
@@ -103,12 +116,14 @@ def lista_contas(engine):
         print(contas)
 
 def contas_cliente(engine):
-    """_summary_
+    """
+    Função que lista todas as contas cadastradas de um determinado cliente.
+    É utilizado para filtragem o número de CPF do cliente.
 
     Args:
-        engine (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
-    print("@@@ Lista de conta do cliente! @@@\n")
+    print("@@@ Lista de contas do cliente! @@@\n")
 
     # Digitando cpf para buscar o cliente na base de dados.
     cpf = input("Digite somente os numeros do CPF do cliente: ")
@@ -121,14 +136,16 @@ def contas_cliente(engine):
     
     for resultados_contas_cliente in resultados:
         print(resultados_contas_cliente)
-    
 
-def main(engine, num_conta):
-    """_summary_
+
+def main(engine, numero_conta):
+    """
+    Função principal que executa um loop com as opções disponíveis.
+    Para sair do loop é necessário digitar o número "0".
 
     Args:
-        engine (_type_): _description_
-        num_conta (_type_): _description_
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
+        num_conta (int): Recebe um número inteiro inicial de conta, que é incrementado a cada novo cadastro de conta.
     """
     while True:
         opcao = menu()
@@ -137,7 +154,7 @@ def main(engine, num_conta):
             cadastrando_cliente(engine)
 
         elif opcao == "2":
-            cadastrando_conta(engine, num_conta)
+            cadastrando_conta(engine, numero_conta)
             num_conta += 1
 
         elif opcao == "3":

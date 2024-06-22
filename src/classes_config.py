@@ -99,11 +99,29 @@ class ConexaoDancoDados:
         self.__engine = self.criando_engine_db()
 
     def criando_engine_db(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         engine = create_engine(self.__string_de_conexao, echo=True)
         return engine
 
     def get_engine(self):
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         return self.__engine
     
     def metadata_create_all(self, engine):
+        """_summary_
+
+        Args:
+            engine (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         return Base.metadata.create_all(engine)
