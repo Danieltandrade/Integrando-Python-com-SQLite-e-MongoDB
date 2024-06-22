@@ -16,11 +16,30 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
 
 class Base(DeclarativeBase):
-    'Declarando a base de dados.'
+    """
+    Classe Base criada para novos mapeamentos declarativos.
+
+    Args:
+        DeclarativeBase (Class): Classe mãe usada para declarar definições da Classe Base
+
+    Returns:
+        Any: Mapeamento declarativo.
+    """
 
 
 class Cliente(Base):
-    'Classe para inclusão de dados do cliente.'
+    """
+    Classe com parâmetros para criação da tabela "cliente"
+    Nesta Classe está definido os atributos que serão usados na criação da tabela no Banco de Dados.
+
+    Args:
+        Base (Class): Classe mãe com métodos para configuração da classe filha "Cliente".
+
+    Returns:
+        Tuple: Retorna uma tupla com as colunas da tabela.
+    """
+
+    # Definindo o nome da tabela para "cliente".
     __tablename__ = "cliente"
 
     # Atributos
@@ -29,9 +48,11 @@ class Cliente(Base):
     cpf: Mapped[str] = mapped_column(String(11))
     endereco: Mapped[str] = mapped_column(String(100))
 
+    # Variável utilizada para relacionar a tabela "Cliente" com a tabela "Conta"
     contas: Mapped[List["Conta"]] = relationship(back_populates="clientes", cascade="all, delete-orphan")
 
-    def __repr__(self) -> str:
+    # Método utilizado para realizar uma representação na forma de string da tabela.
+    def __repr__(self):
         return f"Cliente(id={self.id}, nome={self.nome}, cpf={self.cpf}, endereco={self.endereco})"
 
 

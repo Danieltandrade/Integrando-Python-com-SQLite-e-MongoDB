@@ -23,6 +23,7 @@ def menu():
     Return: 
         str: Retorna uma lista com as opções do menu. 
     """
+
     menu = """\n
     ================ MENU ================
     [1]\tCriar Cliente
@@ -32,6 +33,7 @@ def menu():
     [5]\tLista de Contas por Cliente
     [0]\tSair
     => """
+
     return input(textwrap.dedent(menu))
 
 def cadastrando_cliente(engine):
@@ -41,6 +43,7 @@ def cadastrando_cliente(engine):
     Args:
         engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
+
     print("@@@ Cadastro de Cliente! @@@\n")
 
     # Iniciando cadastro com nome completo e cpf
@@ -53,7 +56,7 @@ def cadastrando_cliente(engine):
     # Chamando o método "criando_objeto_cliente" para criar o objeto cliente.
     cliente = CriandoObjeto(engine, nome, cpf, endereco)
     cliente.objeto_cliente()
-    
+
     print("@@@ Cliente criado com sucesso! @@@\n")
 
 def cadastrando_conta(engine, numero_conta):
@@ -65,18 +68,24 @@ def cadastrando_conta(engine, numero_conta):
         engine (str): Recebe a variável "engine" da criação do banco de dados.
         numero_conta (int): Recebe um número inteiro referente a conta do cliente.
     """
+
     print("@@@ Cadastro de Conta! @@@\n")
 
     # Digitando cpf para buscar o cliente na base de dados.
     cpf = input("Digite somente os numeros do CPF do cliente: ")
 
+    # Criando a session para conversa com Banco de Dados.
     session = Session(engine)
+
+    # Criando e executando o objeto da consulta pedida.
     stmt = select(Cliente).where(Cliente.cpf == cpf)
     resultado = session.execute(stmt)
 
+    # Processando e imprimindo os resultados.
     for result in resultado.scalars():
         id_tabela = result.id
 
+    # Variáveis para cadastro na tabela "Conta"
     tipo_conta = "Conta Corrente"
     agencia = "0001"
     num_conta = numero_conta
@@ -84,6 +93,9 @@ def cadastrando_conta(engine, numero_conta):
 
     conta = CriandoObjeto.objeto_conta(engine, tipo_conta, agencia, num_conta, saldo_conta, id_tabela)
     print(conta)
+
+    # Fechando a session.
+    session.close()
     
     print("@@@ Conta criada com sucesso! @@@\n")
 
@@ -94,12 +106,21 @@ def lista_clientes(engine):
     Args:
         engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
+
+    # Criando a session para conversa com Banco de Dados.
     session = Session(engine)
 
+    # Criando e executando o objeto da consulta pedida.
     stmt = select(Cliente)
+
     print("\n@@@ Listando clientes do Banco! @@@")
+    
+    # Processando e imprimindo os resultados.
     for clientes in session.scalars(stmt):
         print(clientes)
+
+    # Fechando a session.
+    session.close()
 
 def lista_contas(engine):
     """
@@ -108,12 +129,21 @@ def lista_contas(engine):
     Args:
         engine (str): Recebe a variável "engine" da criação do banco de dados.
     """
+
+    # Criando a session para conversa com Banco de Dados.
     session = Session(engine)
 
+    # Criando e executando o objeto da consulta pedida.
     stmt = select(Conta)
+
     print("\n@@@ Listando contas de clientes no Banco! @@@")
+
+    # Processando e imprimindo os resultados.
     for contas in session.scalars(stmt):
         print(contas)
+
+    # Fechando a session.
+    session.close()
 
 def contas_cliente(engine):
     """
@@ -129,14 +159,19 @@ def contas_cliente(engine):
     cpf = input("Digite somente os numeros do CPF do cliente: ")
 
     session = Session(engine)
-    
+
+    # Consulta para selecionar os campos desejados.
     stmt_join = (select(Cliente.id, Cliente.nome, Conta.tipo, Conta.agencia, Conta.num).join(Conta, Cliente.id == Conta.id_cliente).where(Cliente.cpf == cpf))
     
+    # Execute a consulta.
     resultados = session.execute(stmt_join).all()
     
+    # Processar e imprimir os resultados.
     for resultados_contas_cliente in resultados:
         print(resultados_contas_cliente)
 
+    # Fechando a session.
+    session.close()
 
 def main(engine, numero_conta):
     """
@@ -147,6 +182,8 @@ def main(engine, numero_conta):
         engine (str): Recebe a variável "engine" da criação do banco de dados.
         num_conta (int): Recebe um número inteiro inicial de conta, que é incrementado a cada novo cadastro de conta.
     """
+
+    # Loop para execução dos menus existentes.
     while True:
         opcao = menu()
         
@@ -155,7 +192,7 @@ def main(engine, numero_conta):
 
         elif opcao == "2":
             cadastrando_conta(engine, numero_conta)
-            num_conta += 1
+            numero_conta += 1
 
         elif opcao == "3":
             lista_clientes(engine)
@@ -177,7 +214,7 @@ def main(engine, numero_conta):
 conexao_banco_dados = ConexaoDancoDados()
 engine = conexao_banco_dados.criando_engine_db()
 
-# Aqui são criadas as tabelas caso elas não existam.
+# Tabelas criadas caso elas não existam.
 criando_tabelas = ConexaoDancoDados()
 criando_tabelas.metadata_create_all(engine)
 
