@@ -10,6 +10,7 @@ from classes_config import Cliente
 from classes_config import Conta
 from classes_config import CriandoObjeto
 from classes_config import ConexaoDancoDados
+from sqlalchemy import delete
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -31,6 +32,7 @@ def menu():
     [3]\tListar Clientes
     [4]\tListar Contas
     [5]\tLista de Contas por Cliente
+    [6]\tDeletar Cliente
     [0]\tSair
     => """
 
@@ -173,6 +175,55 @@ def contas_cliente(engine):
     # Fechando a session.
     session.close()
 
+def delete_cliente(engine):
+    """
+    Função para deletar um cliente e suas contas associadas.
+
+    Args:
+        engine (str): Recebe a variável "engine" da criação do banco de dados.
+    """
+
+    print("\n@@@ Deletando Cliente e Conta! @@@\n")
+
+    # Digitando cpf para buscar o cliente na base de dados.
+    cpf = input("Digite somente os numeros do CPF do cliente: ")
+
+    # Verifica se há certeza na exclusão do cliente.
+    confirmacao = input("""
+                        Deseja realmente excluir este cliente e conta?
+                        Digite "s" para sim e "n" para não: 
+                        """
+                    )
+    
+    # Coloca o valor armazenado na variável em minúsculo
+    confirmacao.lower()
+
+    # Estrutura condicional para verificar se é ou não para excluir o cliente.
+    if confirmacao == "s":
+
+        # Criando a session para conversa com Banco de Dados.
+        session = Session(engine)
+
+        # Criando o objeto da consulta pedida.
+        cliente = session.execute(select(Cliente).where(Cliente.cpf == cpf)).scalar_one_or_none()
+
+        # Deletando o cliente (e automaticamente as contas associadas).
+        session.delete(cliente)
+
+        # Confirmando transação.
+        session.commit()
+
+        print(f"\n@@@ Cliente com CPF {cpf} e suas contas foram deletados. @@@\n")
+
+        # Fechando a session.
+        session.close()
+    
+    elif confirmacao == "n":
+        print("\n@@@ Operação cancelada! @@@\n")
+    
+    else:
+        print("\n@@@ Valor inválido. Operação cancelada! @@@\n")
+
 def main(engine, numero_conta):
     """
     Função principal que executa um loop com as opções disponíveis.
@@ -202,6 +253,9 @@ def main(engine, numero_conta):
 
         elif opcao == "5":
             contas_cliente(engine)
+            
+        elif opcao == "6":
+            delete_cliente(engine)
 
         elif opcao == "0":  # Finalizando loop.
             break
