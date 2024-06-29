@@ -4,7 +4,7 @@
 - Módulo: Integrando-Python-com-SQLite-e-MongoDB
 - Instrutor: Juliana Mascarenhas
 - Instituição: [DIO.me](https://www.dio.me/)
-- Editor de Código: [VS Code](https://img.shields.io/badge/Vscode-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+- Editor de Código: ![Vscode](https://img.shields.io/badge/Vscode-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
 
 Neste desafio utilizei a ideia do sistema bancário criado nos módulos anteriores, utilizando o paradigma de Programação Orientada a Objetos e também integração com SQLite e MongoDB.
 
@@ -205,3 +205,9 @@ Grande abraço a todos!!!
 - ![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)
 
 - ![Vscode](https://img.shields.io/badge/Vscode-007ACC?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+
+## Banco de Dados
+
+- ![SQLite](https://img.shields.io/badge/SQLite-000?style=for-the-badge&logo=sqlite&logoColor=07405E)
+
+- ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
