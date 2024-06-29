@@ -248,7 +248,7 @@ class ManipulandoMongoDB:
             MongoClient: Instância do cliente MongoDB.
         """
 
-        client = MongoClient("mongodb+srv://danieltorresandrade:Padrao%2624F%2A@cluster0.p3wgir1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+        client = MongoClient("mongodb+srv://user_name:passwordcluster0.p3wgir1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 
         # Criando um Banco de Dados dentro do meu Cluster.
         self.__db = client.banco_dados
