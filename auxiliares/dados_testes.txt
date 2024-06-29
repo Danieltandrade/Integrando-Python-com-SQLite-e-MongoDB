@@ -1,0 +1,20 @@
+# Dados para Testes
+
+Os clientes listados abaixo são fictícios e foram criados para efeitos de testes no projeto.
+Qualquer relação com pessoas reais é mera coincidência.
+
+__Nome:__ Pedro Batista Saraiva
+__CPF:__ 08912455632
+__Endereço:__ Rua Júlio Prestes, 789 - Centro - Uberlândia/MG
+
+__Nome:__ Fernanda Lima Santos
+__CPF:__ 12348923550
+__Endereço:__ Rua Esplanada, 400 - Ipanema - Rio de Janeiro/RJ
+
+__Nome:__ Marcio Santos Garcia
+__CPF:__ 84000132810
+__Endereço:__ Avenida Getúlio Vargas, 1890 - Centro - São Paulo/SP
+
+__Nome:__ Jair Motta Santos
+__CPF:__ 04190926636
+__Endereço:__ Alameda Bombonatto, 56 - Esplanada - Brasília/DF

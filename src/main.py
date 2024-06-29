@@ -3,6 +3,8 @@
     Curso: Python Development
     Instituição: DIO.me
     Instrutor: Juliana Mascarenhas
+    
+    Arquivo com a lógica para execução do código.
 """
 
 import textwrap
@@ -10,7 +12,8 @@ from classes_config import Cliente
 from classes_config import Conta
 from classes_config import CriandoObjeto
 from classes_config import ConexaoDancoDados
-from sqlalchemy import delete
+from classes_config import ManipulandoMongoDB
+from classes_config import ListasMongoDB
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -38,7 +41,7 @@ def menu():
 
     return input(textwrap.dedent(menu))
 
-def cadastrando_cliente(engine):
+def cadastrando_cliente(engine, db):
     """
     Função para cadastro de novos clientes.
 
@@ -58,13 +61,17 @@ def cadastrando_cliente(engine):
     # Chamando o método "criando_objeto_cliente" para criar o objeto cliente.
     cliente = CriandoObjeto(engine, nome, cpf, endereco)
     cliente.objeto_cliente()
+    
+    # Chamando o método "inserindo_post_cliente" para inserir um novo cliente no MongoDB.
+    cliente_mongodb = ManipulandoMongoDB()
+    cliente_mongodb.inserindo_post_cliente(nome, cpf, endereco, db)
 
     print("@@@ Cliente criado com sucesso! @@@\n")
 
-def cadastrando_conta(engine, numero_conta):
+def cadastrando_conta(engine, numero_conta, db):
     """
     Função para cadastro de novas contas para o cliente.
-    Cada conta deve ter um número diferente,
+    Cada conta deve ter um número diferente.
     
     Args:
         engine (str): Recebe a variável "engine" da criação do banco de dados.
@@ -93,15 +100,21 @@ def cadastrando_conta(engine, numero_conta):
     num_conta = numero_conta
     saldo_conta = 0.0
 
+    print()
+    # Inserindo o objeto conta no Banco de Dados.
     conta = CriandoObjeto.objeto_conta(engine, tipo_conta, agencia, num_conta, saldo_conta, id_tabela)
     print(conta)
 
     # Fechando a session.
     session.close()
+
+    # Chamando o método "inserindo_post_conta" para inserir uma nova conta no MongoDB.
+    conta_mongodb = ManipulandoMongoDB()
+    conta_mongodb.inserino_post_conta(tipo_conta, agencia, num_conta, saldo_conta, cpf, db)
     
     print("@@@ Conta criada com sucesso! @@@\n")
 
-def lista_clientes(engine):
+def lista_clientes(engine, db):
     """
     Função que cria uma lista com todos os clientes cadastrados.
 
@@ -115,7 +128,7 @@ def lista_clientes(engine):
     # Criando e executando o objeto da consulta pedida.
     stmt = select(Cliente)
 
-    print("\n@@@ Listando clientes do Banco! @@@")
+    print("\n@@@ Listando clientes do Banco! @@@\n")
     
     # Processando e imprimindo os resultados.
     for clientes in session.scalars(stmt):
@@ -124,7 +137,12 @@ def lista_clientes(engine):
     # Fechando a session.
     session.close()
 
-def lista_contas(engine):
+    # Processando e imprimindo os resultados da coleta de clientes presentes no MongoBD.
+    print("\n@@@ Imprimindo lista de clientes presentes no MongoDB: @@@")
+    lista_clientes_mongodb = ListasMongoDB()
+    lista_clientes_mongodb.lista_clientes(db)
+
+def lista_contas(engine, db):
     """
     Função que cria uma lista com todas as contas cadastradas.
 
@@ -138,7 +156,7 @@ def lista_contas(engine):
     # Criando e executando o objeto da consulta pedida.
     stmt = select(Conta)
 
-    print("\n@@@ Listando contas de clientes no Banco! @@@")
+    print("\n@@@ Listando contas de clientes no Banco SQLite! @@@\n")
 
     # Processando e imprimindo os resultados.
     for contas in session.scalars(stmt):
@@ -147,7 +165,12 @@ def lista_contas(engine):
     # Fechando a session.
     session.close()
 
-def contas_cliente(engine):
+    # Processando e imprimindo os resultados da coleta de contas presentes no MongoBD.
+    print("\n@@@ Imprimindo lista de contas presentes no MongoDB: @@@\n")
+    lista_contas_mongodb = ListasMongoDB()
+    lista_contas_mongodb.lista_contas(db)
+
+def contas_cliente(engine, db):
     """
     Função que lista todas as contas cadastradas de um determinado cliente.
     É utilizado para filtragem o número de CPF do cliente.
@@ -174,8 +197,12 @@ def contas_cliente(engine):
 
     # Fechando a session.
     session.close()
+    
+    # Listando contas cadastradas no MongoDB.
+    resultado_contas_cliente = ListasMongoDB()
+    resultado_contas_cliente.lista_cliente_e_conta(cpf, db)
 
-def delete_cliente(engine):
+def delete_cliente(engine,db):
     """
     Função para deletar um cliente e suas contas associadas.
 
@@ -213,10 +240,14 @@ def delete_cliente(engine):
         # Confirmando transação.
         session.commit()
 
-        print(f"\n@@@ Cliente com CPF {cpf} e suas contas foram deletados. @@@\n")
+        # Deletando o cliente (e automaticamente as contas associadas) no MongoDB.
+        deletando_cliente_contas = ListasMongoDB()
+        deletando_cliente_contas.deletando_cliente_e_contas(cpf, db)
 
         # Fechando a session.
         session.close()
+
+        print(f"\n@@@ Cliente com CPF {cpf} e suas contas foram deletados. @@@\n")
     
     elif confirmacao == "n":
         print("\n@@@ Operação cancelada! @@@\n")
@@ -238,24 +269,24 @@ def main(engine, numero_conta):
     while True:
         opcao = menu()
         
-        if opcao == "1":  # Chamada para criação de um novo cliente dentro do banco de dados.
-            cadastrando_cliente(engine)
+        if opcao == "1":
+            cadastrando_cliente(engine, db)
 
         elif opcao == "2":
-            cadastrando_conta(engine, numero_conta)
+            cadastrando_conta(engine, numero_conta, db)
             numero_conta += 1
 
         elif opcao == "3":
-            lista_clientes(engine)
+            lista_clientes(engine, db)
 
         elif opcao == "4":
-            lista_contas(engine)
+            lista_contas(engine, db)
 
         elif opcao == "5":
-            contas_cliente(engine)
+            contas_cliente(engine, db)
             
         elif opcao == "6":
-            delete_cliente(engine)
+            delete_cliente(engine, db)
 
         elif opcao == "0":  # Finalizando loop.
             break
@@ -271,6 +302,10 @@ engine = conexao_banco_dados.criando_engine_db()
 # Tabelas criadas caso elas não existam.
 criando_tabelas = ConexaoDancoDados()
 criando_tabelas.metadata_create_all(engine)
+
+# Criando conexão com MongoDB
+client = ManipulandoMongoDB()
+db = client.connection_mongo_client()
 
 # Variável com número inicial de conta.
 num_conta = 1001

@@ -3,9 +3,13 @@
     Curso: Python Development
     Instituição: DIO.me
     Instrutor: Juliana Mascarenhas
+    
+    Arquivo com as classes que serão utilizadas pelo main.py para execução do código.
 """
 
-from typing import List
+
+from pprint import pprint
+from pymongo import MongoClient
 from sqlalchemy import create_engine
 from sqlalchemy import String
 from sqlalchemy import ForeignKey
@@ -14,29 +18,29 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
+from typing import List
+
+
 
 class Base(DeclarativeBase):
     """
     Classe Base criada para novos mapeamentos declarativos.
 
-    Args:
-        DeclarativeBase (Class): Classe mãe usada para declarar definições da Classe Base.
-
-    Returns:
-        Any: Mapeamento declarativo.
     """
+    pass
 
 
 class Cliente(Base):
     """
-    Classe com parâmetros para criação da tabela "cliente"
+    Classe que define a tabela "cliente"
     Nesta Classe está definido os atributos que serão usados na criação da tabela no Banco de Dados.
 
-    Args:
-        Base (Class): Classe mãe com métodos para configuração da classe filha "Cliente".
-
-    Returns:
-        Tuple: Retorna uma tupla com as colunas da tabela.
+    Atributos:
+        id (int): Identificador único do cliente.
+        nome (str): Nome do cliente.
+        cpf (str): CPF do cliente.
+        endereco (str): Endereço do cliente.
+        contas (List["Conta"]): Relacionamento com a tabela 'conta'.
     """
 
     # Definindo o nome da tabela para "cliente".
@@ -186,7 +190,7 @@ class ConexaoDancoDados:
         Método criado para criar a conexão com o Banco de Dados.
 
         Returns:
-            func: Retorna uma instância com o argumento para criação do Banco de Dados.
+            Engine: Instância do motor de banco de dados.
         """
         
         # Motor utilizado para criação do Banco de Dados.
@@ -196,23 +200,184 @@ class ConexaoDancoDados:
 
     def get_engine(self):
         """
-        Método auxiliar para chamar diretamente a função create_engine.
+        Método auxiliar para retorna o motor de banco de dados.
 
         Returns:
-            func: Retorna uma instância com o argumento para criação do Banco de Dados.
+            Engine: Instância do motor de banco de dados.
         """
         
         return self.__engine
     
     def metadata_create_all(self, engine):
         """
-        Método utilizado para criar as tabelas do Banco de Dados caso elas não estejam criadas.
+        Método utilizado para criar as tabelas do Banco de Dados.
 
         Args:
-            engine (str): Recebe "engine" que foi utilizado para criação do Banco de Dados.
+            engine (Engine): Recebe motor do Banco de Dados.
 
         Returns:
             _type_: _description_
         """
 
         return Base.metadata.create_all(engine)
+
+
+class ManipulandoMongoDB:
+    """
+    Classe para manipular o MongoDB.
+    
+    A Classe possui os métodos:
+        -> connection_mongo_client()
+        -> get_database_collection()
+        -> inserindo_post_cliente()
+        -> inserindo_post_conta()
+    """
+    
+    def __init__(self):
+        """
+        Método construtor com atributos privados.
+        """
+        self.__client = None
+        self.__db = None
+
+    def connection_mongo_client(self):
+        """
+        Cria e retorna uma conexão com o MongoDB.
+
+        Returns:
+            MongoClient: Instância do cliente MongoDB.
+        """
+
+        client = MongoClient("mongodb+srv://danieltorresandrade:Padrao%2624F%2A@cluster0.p3wgir1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+
+        # Criando um Banco de Dados dentro do meu Cluster.
+        self.__db = client.banco_dados
+        
+        return self.__db
+
+    def inserindo_post_cliente(self, nome, cpf, endereco, db):
+        """
+        Insere um novo cliente no MongoDB.
+
+        Args:
+            nome (str): Nome do cliente.
+            cpf (str): CPF do cliente.
+            endereco (str): Endereço do cliente.
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        cliente = {
+            "nome_cliente": nome,
+            "cpf_cliente": cpf,
+            "endereco_cliente": endereco,
+        }
+        
+        clientes = db.clientes
+        cliente_id = clientes.insert_one(cliente).inserted_id
+
+        return clientes
+
+    def inserino_post_conta(self, tipo, agencia, num, saldo, cpf, db):
+        """
+        Insere uma nova conta no MongoDB.
+
+        Args:
+            tipo (str): Tipo da conta.
+            agencia (str): Agência da conta.
+            num (int): Número da conta.
+            saldo (float): Saldo da conta.
+            cpf (str): CPF do cliente.
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        clientes = db.clientes
+        
+        conta_cliente = clientes.find_one({'cpf_cliente': cpf})
+        
+        conta = {
+            "tipo_conta": tipo,
+            "agencia": agencia,
+            "numero_conta": num,
+            "saldo_conta": saldo,
+            "id_cliente": conta_cliente['_id']
+        }
+
+        contas = db.contas
+        conta_id = contas.insert_one(conta).inserted_id
+        
+        return conta_id
+
+
+class ListasMongoDB(ManipulandoMongoDB):
+    """
+        Classe para listar dados no MongoDB.
+
+        Métodos:
+            lista_clientes(db): Lista todos os clientes no MongoDB.
+            lista_contas(db): Lista todas as contas no MongoDB.
+            lista_cliente_e_conta(cpf, db): Lista um cliente e suas contas no MongoDB.
+            deletando_cliente_e_contas(cpf, db): Deleta um cliente e suas contas no MongoDB.
+    """
+
+    def lista_clientes(self, db):
+        """
+        Lista todos os clientes no MongoDB.
+
+        Args:
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        clientes = db.clientes
+    
+        for cliente in clientes.find():
+            pprint(cliente)
+
+    def lista_contas(self, db):
+        """
+        Lista todas as contas no MongoDB.
+
+        Args:
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        contas = db.contas
+    
+        for conta in contas.find():
+            pprint(conta)
+
+    def lista_cliente_e_conta(self, cpf, db):
+        """
+        Lista um cliente e suas contas no MongoDB.
+
+        Args:
+            cpf (str): CPF do cliente.
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        clientes = db.clientes
+        contas = db.contas
+
+        cliente_filtrado = clientes.find_one({'cpf_cliente': cpf})
+
+        print("\n@@@ Lista com cliente solicitado e suas respectivas contas. @@@")
+        print(f"Cliente: {cliente_filtrado}")
+        
+        for contas_filtradas in contas.find({'id_cliente': cliente_filtrado['_id']}):
+            print(f"\nContas: {contas_filtradas}")
+
+    def deletando_cliente_e_contas(self, cpf, db):
+        """
+        Deleta um cliente e suas contas no MongoDB.
+
+        Args:
+            cpf (str): CPF do cliente.
+            db (Database): Instância do banco de dados MongoDB.
+        """
+        
+        clientes = db.clientes
+        contas = db.contas
+        
+        cliente_filtrado = clientes.find_one({'cpf_cliente': cpf})
+        
+        deletando_contas = contas.delete_many({'id_cliente': cliente_filtrado['_id']})
+        deletando_cliente = clientes.delete_one({'cpf_cliente': cpf})
